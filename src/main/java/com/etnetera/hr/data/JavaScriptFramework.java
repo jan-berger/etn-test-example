@@ -32,7 +32,7 @@ public class JavaScriptFramework {
 	private String name;
 
 	@Valid
-	@OneToMany(mappedBy = "framework", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "framework", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<JavaScriptFrameworkVersion> versions = new ArrayList<>();
 
 	
@@ -63,6 +63,10 @@ public class JavaScriptFramework {
 	public void addVersion(String version, JavaScriptFrameworkHypeLevel hypeLevel, Date deprecationDate) {
 		Integer versionOrder = getCurrentVersion().map(JavaScriptFrameworkVersion::getVersionOrder).orElse(0) + 10;
 		addVersion(new JavaScriptFrameworkVersion(version, versionOrder, hypeLevel, deprecationDate, this));
+	}
+
+	public void prepareForRequest() {
+		getVersions().forEach(v -> v.setFramework(this));
 	}
 
 	public Long getId() {

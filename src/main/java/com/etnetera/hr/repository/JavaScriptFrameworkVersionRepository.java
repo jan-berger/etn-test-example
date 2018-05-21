@@ -1,9 +1,9 @@
 package com.etnetera.hr.repository;
 
+import com.etnetera.hr.data.JavaScriptFramework;
+import com.etnetera.hr.data.JavaScriptFrameworkVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
-
-import com.etnetera.hr.data.JavaScriptFramework;
 import org.springframework.data.repository.Repository;
 
 /**
@@ -12,6 +12,6 @@ import org.springframework.data.repository.Repository;
  * @author Etnetera
  *
  */
-public interface JavaScriptFrameworkRepository extends JpaRepository<JavaScriptFramework, Long>, JavaScriptFrameworkRepositoryExtension {
+public interface JavaScriptFrameworkVersionRepository extends JpaRepository<JavaScriptFrameworkVersion, Long> {
 
 }

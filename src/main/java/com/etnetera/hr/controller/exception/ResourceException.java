@@ -13,4 +13,8 @@ public class ResourceException extends Throwable {
 		super(error.name());
 		this.error = error;
 	}
+
+	public ResourceError getError() {
+		return error;
+	}
 }

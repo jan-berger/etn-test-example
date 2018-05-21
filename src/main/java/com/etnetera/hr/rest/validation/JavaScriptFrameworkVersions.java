@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JavaScriptFrameworkVersions {
-	String message() default "{error.version.invalid}";
+	String message() default "ERROR_JAVASCRIPT_FRAMEWORK_VERSIONS_UNIQUE_VALIDATION";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
 }

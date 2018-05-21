@@ -13,7 +13,7 @@ public class InvalidDataException extends Throwable {
 	
 	private static final long serialVersionUID = -71568990486694572L;
 
-	private BindingResult result;
+	private final BindingResult result;
 	
 	public InvalidDataException(BindingResult result) {
 		super();

@@ -12,7 +12,7 @@ public class JavaScriptFrameworkVersionsValidator implements ConstraintValidator
 
 	@Override
 	public boolean isValid(JavaScriptFramework framework, ConstraintValidatorContext context) {
-		return framework.getVersions().stream().anyMatch(v -> validateEach(framework, v));
+		return framework.getVersions().isEmpty() || framework.getVersions().stream().allMatch(v -> validateEach(framework, v));
 	}
 
 	private boolean validateEach(JavaScriptFramework framework, JavaScriptFrameworkVersion v) {
@@ -21,7 +21,7 @@ public class JavaScriptFrameworkVersionsValidator implements ConstraintValidator
 	}
 
 	private boolean validateField(List<JavaScriptFrameworkVersion> vs, JavaScriptFrameworkVersion v, Function<JavaScriptFrameworkVersion, Object> fieldFunction) {
-		return fieldFunction.apply(v) != null && vs.stream().noneMatch(vv -> !vv.equals(v) && fieldFunction.apply(v).equals(fieldFunction.apply(vv)));
+		return fieldFunction.apply(v) != null && vs.stream().filter(vv -> fieldFunction.apply(v).equals(fieldFunction.apply(vv))).count() <= 1;
 	}
 
 	@Override

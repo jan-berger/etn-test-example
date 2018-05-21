@@ -30,6 +30,10 @@ public class Errors {
 		return new Errors(Collections.singletonList(new SimpleError(message)));
 	}
 
+	public static Errors ofError(String message, String detail) {
+		return new Errors(Collections.singletonList(new SimpleError(message, detail)));
+	}
+
 	public static Errors ofErrors(List<SimpleError> errors) {
 		return new Errors(errors);
 	}

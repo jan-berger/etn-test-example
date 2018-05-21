@@ -37,4 +37,6 @@ public class JavaScriptFrameworkRepositoryImpl implements JavaScriptFrameworkRep
 
 		return em.createQuery(cq).setMaxResults(MAX_RESULT).getResultList();
 	}
+
+
 }
