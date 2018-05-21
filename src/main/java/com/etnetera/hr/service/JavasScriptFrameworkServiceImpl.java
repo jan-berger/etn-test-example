@@ -35,17 +35,16 @@ public class JavasScriptFrameworkServiceImpl implements JavasScriptFrameworkServ
 		JavaScriptFramework oldFramework = repository.findById(frameworkId)
 				.orElseThrow(ResourceError.NOT_FOUND.supplyException());
 		oldFramework.setName(newFramework.getName());
+		/* Looking for all versions that are not present in new framework entity */
 		List<JavaScriptFrameworkVersion> versionsToRemove = oldFramework.getVersions().stream()
 				.filter(v -> newFramework.getVersions().stream().noneMatch(vv -> v.getId().equals(vv.getId())))
 				.collect(Collectors.toList());
-		oldFramework.getVersions().forEach(v -> v.setFramework(null));
-		oldFramework.getVersions().clear();
+		oldFramework.clearVersions();
 		/* We need to delete all versions that are not present in new entity. If we wouldn't do that DB constraint would be violated because Hibernate calls inserts before deletes. */
 		versionRepository.deleteAll(versionsToRemove);
 		/* We also need to flush before calling save */
 		versionRepository.flush();
-		oldFramework.getVersions().addAll(newFramework.getVersions());
-		oldFramework.prepareForRequest();
+		oldFramework.addVersions(newFramework.getVersions());
 		return repository.save(oldFramework);
 	}
 

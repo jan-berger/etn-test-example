@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.persistence.PersistenceException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
@@ -28,7 +29,6 @@ public abstract class EtnRestController {
 
 	@ExceptionHandler({InvalidDataException.class})
 	public ResponseEntity<Errors> handleValidationException(InvalidDataException ex) {
-		Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error in request", ex);
 		BindingResult result = ex.getResult();
 		List<SimpleError> errorList = result.getFieldErrors().stream()
 				.sorted(Comparator.comparing(FieldError::getField))
@@ -48,4 +48,11 @@ public abstract class EtnRestController {
 		Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error in request", ex);
 		return ResponseEntity.badRequest().body(Errors.ofError(ex.getError().name(), ex.getMessage()));
 	}
+
+	@ExceptionHandler({PersistenceException.class})
+	public ResponseEntity<Errors> handlePersistenceException(PersistenceException ex) {
+		return ResponseEntity.badRequest().body(Errors.ofError("PERSISTENCE_ERROR", ex.getMessage()));
+	}
+
+
 }

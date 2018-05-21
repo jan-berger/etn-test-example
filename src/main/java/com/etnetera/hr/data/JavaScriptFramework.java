@@ -60,6 +60,10 @@ public class JavaScriptFramework {
 		getVersions().add(version);
 	}
 
+	public void addVersions(Iterable<JavaScriptFrameworkVersion> versions) {
+		versions.forEach(this::addVersion);
+	}
+
 	public void addVersion(String version, JavaScriptFrameworkHypeLevel hypeLevel, Date deprecationDate) {
 		Integer versionOrder = getCurrentVersion().map(JavaScriptFrameworkVersion::getVersionOrder).orElse(0) + 10;
 		addVersion(new JavaScriptFrameworkVersion(version, versionOrder, hypeLevel, deprecationDate, this));
@@ -67,6 +71,11 @@ public class JavaScriptFramework {
 
 	public void prepareForRequest() {
 		getVersions().forEach(v -> v.setFramework(this));
+	}
+
+	public void clearVersions() {
+		getVersions().forEach(v -> v.setFramework(null));
+		getVersions().clear();
 	}
 
 	public Long getId() {

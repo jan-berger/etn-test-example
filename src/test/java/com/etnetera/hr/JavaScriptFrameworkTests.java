@@ -63,9 +63,13 @@ public class JavaScriptFrameworkTests {
 
 		JavaScriptFramework vue = new JavaScriptFramework("Vue.js");
 		vue.addVersion("0.0.4", JavaScriptFrameworkHypeLevel.MEDIUM, new GregorianCalendar(2018, 5, 31).getTime());
+
+		JavaScriptFramework angular = new JavaScriptFramework("Angular.js");
+		angular.addVersion("0.0.4", JavaScriptFrameworkHypeLevel.MEDIUM, new GregorianCalendar(2018, 5, 31).getTime());
 		
 		repository.save(react);
 		repository.save(vue);
+		repository.save(angular);
 	}
 
 	@Test
@@ -73,7 +77,7 @@ public class JavaScriptFrameworkTests {
 		prepareData();
 
 		mockMvc.perform(get("/frameworks")).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$", hasSize(3)))
 				.andExpect(jsonPath("$[0].name", is("ReactJS")))
 				.andExpect(jsonPath("$[0].versions", hasSize(4)))
 				.andExpect(jsonPath("$[0].versions[0].version", is("0.0.1")))
@@ -105,7 +109,7 @@ public class JavaScriptFrameworkTests {
 
 		mockMvc.perform(get("/frameworks")).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$", hasSize(2)))
 				.andExpect(jsonPath("$[0].name", is("Vue.js")));
 
 		remaining = repository.findAll().iterator().next();
@@ -113,7 +117,7 @@ public class JavaScriptFrameworkTests {
 		mockMvc.perform(delete("/frameworks/"+remaining.getId())).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
 
 		mockMvc.perform(get("/frameworks")).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-				.andExpect(jsonPath("$", hasSize(0)));
+				.andExpect(jsonPath("$", hasSize(1)));
 	}
 
 	@Test
@@ -174,9 +178,22 @@ public class JavaScriptFrameworkTests {
 				.andExpect(jsonPath("$.name", is("goodname2")))
 				.andExpect(jsonPath("$.versions", hasSize(0)));
 
+		toEdit = iterator.next();
+		toEdit.setName("goodname3");
+		toEdit.getVersions().get(0).setVersion("YY");
+
+		mockMvc.perform(post("/frameworks/"+toEdit.getId()).contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(toEdit)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.name", is("goodname3")))
+				.andExpect(jsonPath("$.versions", hasSize(1)))
+				.andExpect(jsonPath("$.versions[0].version", is("YY")))
+				.andExpect(jsonPath("$.versions[0].versionOrder", is(10)))
+				.andExpect(jsonPath("$.versions[0].deprecationDate", is(getJsonFormattedDate(2018, 5, 31))))
+				.andExpect(jsonPath("$.versions[0].hypeLevel", is(JavaScriptFrameworkHypeLevel.MEDIUM.name())));
+
 		mockMvc.perform(get("/frameworks")).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$", hasSize(3)))
 				.andExpect(jsonPath("$[0].name", is("goodname")))
 				.andExpect(jsonPath("$[0].versions", hasSize(4)))
 				.andExpect(jsonPath("$[0].versions[0].version", is("X")))
@@ -198,8 +215,16 @@ public class JavaScriptFrameworkTests {
 				.andExpect(jsonPath("$[0].versions[3].versionOrder", is(40)))
 				.andExpect(jsonPath("$[0].versions[3].deprecationDate", is(getJsonFormattedDate(2017, 4, 30))))
 				.andExpect(jsonPath("$[0].versions[3].hypeLevel", is(JavaScriptFrameworkHypeLevel.MEDIUM.name())))
+
 				.andExpect(jsonPath("$[1].name", is("goodname2")))
-				.andExpect(jsonPath("$[1].versions", hasSize(0)));
+				.andExpect(jsonPath("$[1].versions", hasSize(0)))
+
+				.andExpect(jsonPath("$[2].name", is("goodname3")))
+				.andExpect(jsonPath("$[2].versions", hasSize(1)))
+				.andExpect(jsonPath("$[2].versions[0].version", is("YY")))
+				.andExpect(jsonPath("$[2].versions[0].versionOrder", is(10)))
+				.andExpect(jsonPath("$[2].versions[0].deprecationDate", is(getJsonFormattedDate(2018, 5, 31))))
+				.andExpect(jsonPath("$[2].versions[0].hypeLevel", is(JavaScriptFrameworkHypeLevel.MEDIUM.name())));
 	}
 
 	@Test
@@ -256,6 +281,15 @@ public class JavaScriptFrameworkTests {
 				.andExpect(jsonPath("$.errors", hasSize(1)))
 				.andExpect(jsonPath("$.errors[0].field", is("name")))
 				.andExpect(jsonPath("$.errors[0].message", is("Size")));
+
+		framework.setName("goodname1");
+		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors", hasSize(1)))
+				.andExpect(jsonPath("$.errors[0].message", is("PERSISTENCE_ERROR")));
 	}
 
 	@Test
