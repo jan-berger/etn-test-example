@@ -14,6 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Sane implementation
+ *
+ * @author Berger
+ */
 @Service
 public class JavasScriptFrameworkServiceImpl implements JavasScriptFrameworkService {
 
@@ -39,22 +44,24 @@ public class JavasScriptFrameworkServiceImpl implements JavasScriptFrameworkServ
 		List<JavaScriptFrameworkVersion> versionsToRemove = oldFramework.getVersions().stream()
 				.filter(v -> newFramework.getVersions().stream().noneMatch(vv -> v.getId().equals(vv.getId())))
 				.collect(Collectors.toList());
-		oldFramework.clearVersions();
 		/* We need to delete all versions that are not present in new entity. If we wouldn't do that DB constraint would be violated because Hibernate calls inserts before deletes. */
+		oldFramework.clearVersions(versionsToRemove);
 		versionRepository.deleteAll(versionsToRemove);
 		/* We also need to flush before calling save */
 		versionRepository.flush();
+
+		/* now it is possible to add new versions and save */
 		oldFramework.addVersions(newFramework.getVersions());
 		return repository.save(oldFramework);
 	}
 
 	@Override
-	public JavaScriptFramework add(JavaScriptFramework newFramework) throws ResourceException {
+	public JavaScriptFramework add(JavaScriptFramework newFramework) {
 		return repository.save(newFramework);
 	}
 
 	@Override
-	public Iterable<JavaScriptFramework> get() throws ResourceException {
+	public Iterable<JavaScriptFramework> get() {
 		return repository.findAll();
 	}
 

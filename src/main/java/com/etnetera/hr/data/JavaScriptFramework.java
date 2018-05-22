@@ -1,15 +1,13 @@
 package com.etnetera.hr.data;
 
-import com.etnetera.hr.rest.validation.JavaScriptFrameworkVersions;
+import com.etnetera.hr.data.validation.JavaScriptFrameworkVersions;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Simple data entity describing basic properties of every JavaScript framework.
@@ -55,27 +53,67 @@ public class JavaScriptFramework {
 		return versions.stream().max(Comparator.comparing(JavaScriptFrameworkVersion::getVersionOrder));
 	}
 
+	/**
+	 * Adds version and sets it's framework
+	 *
+	 * @param version to be added
+	 */
 	public void addVersion(JavaScriptFrameworkVersion version) {
 		version.setFramework(this);
 		getVersions().add(version);
 	}
 
-	public void addVersions(Iterable<JavaScriptFrameworkVersion> versions) {
-		versions.forEach(this::addVersion);
+	/**
+	 * Merges new versions with old versions based on ID
+	 *
+	 * @param versions to be merged with existing versions
+	 */
+	public void addVersions(List<JavaScriptFrameworkVersion> versions) {
+		versions.forEach(newVersion -> {
+			Optional<JavaScriptFrameworkVersion> version = getVersions().stream()
+					.filter(v -> v.getId() != null && v.getId().equals(newVersion.getId())).findAny();
+			if (version.isPresent()) {
+				if (!version.get().equals(newVersion)) {
+					version.get().setFramework(this);
+					version.get().setVersion(newVersion.getVersion());
+					version.get().setHypeLevel(newVersion.getHypeLevel());
+					version.get().setDeprecationDate(newVersion.getDeprecationDate());
+				}
+			} else {
+				addVersion(newVersion);
+			}
+		});
 	}
 
+	/**
+	 * Adds version with corresponding order and framework
+	 *
+	 * @param version of new version
+	 * @param hypeLevel of new version
+	 * @param deprecationDate of new version
+	 */
 	public void addVersion(String version, JavaScriptFrameworkHypeLevel hypeLevel, Date deprecationDate) {
 		Integer versionOrder = getCurrentVersion().map(JavaScriptFrameworkVersion::getVersionOrder).orElse(0) + 10;
 		addVersion(new JavaScriptFrameworkVersion(version, versionOrder, hypeLevel, deprecationDate, this));
 	}
 
+	/**
+	 * Prepares object for request
+	 */
 	public void prepareForRequest() {
 		getVersions().forEach(v -> v.setFramework(this));
 	}
 
-	public void clearVersions() {
-		getVersions().forEach(v -> v.setFramework(null));
-		getVersions().clear();
+	/**
+	 * Deletes versions from it's collection and sets framework to null
+	 *
+	 * @param versionsToRemove
+	 */
+	public void clearVersions(List<JavaScriptFrameworkVersion> versionsToRemove) {
+		versionsToRemove.forEach(v -> {
+			v.setFramework(null);
+			getVersions().remove(v);
+		});
 	}
 
 	public Long getId() {

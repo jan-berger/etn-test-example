@@ -5,13 +5,13 @@ import com.etnetera.hr.controller.exception.ResourceException;
 import com.etnetera.hr.rest.Errors;
 import com.etnetera.hr.rest.SimpleError;
 import com.etnetera.hr.rest.ValidationError;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.persistence.PersistenceException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
@@ -45,14 +45,13 @@ public abstract class EtnRestController {
 
 	@ExceptionHandler({ResourceException.class})
 	public ResponseEntity<Errors> handleNotFoundException(ResourceException ex) {
-		Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error in request", ex);
+		Logger.getLogger(getClass().getName()).log(Level.INFO, "Error in request", ex);
 		return ResponseEntity.badRequest().body(Errors.ofError(ex.getError().name(), ex.getMessage()));
 	}
 
-	@ExceptionHandler({PersistenceException.class})
-	public ResponseEntity<Errors> handlePersistenceException(PersistenceException ex) {
-		return ResponseEntity.badRequest().body(Errors.ofError("PERSISTENCE_ERROR", ex.getMessage()));
+	@ExceptionHandler({NestedRuntimeException.class})
+	public ResponseEntity<Errors> handleSpringException(NestedRuntimeException ex) {
+		Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error in request", ex);
+		return ResponseEntity.badRequest().body(Errors.ofError("GENERAL_ERROR", ex.getMessage()));
 	}
-
-
 }

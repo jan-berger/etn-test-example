@@ -4,6 +4,11 @@ import com.etnetera.hr.controller.exception.ResourceException;
 import com.etnetera.hr.data.JavaScriptFramework;
 import com.etnetera.hr.repository.JavaScriptFrameworkRepositoryExtension;
 
+/**
+ * Service handling all requests for JavaScriptFramework
+ *
+ * @author Berger
+ */
 public interface JavasScriptFrameworkService extends JavaScriptFrameworkRepositoryExtension {
 
 	JavaScriptFramework edit(Long frameworkId, JavaScriptFramework newFramework) throws ResourceException;

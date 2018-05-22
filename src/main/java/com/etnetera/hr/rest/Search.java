@@ -5,6 +5,11 @@ import com.etnetera.hr.data.JavaScriptFrameworkHypeLevel;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
+/**
+ * REST input entity representing search.
+ *
+ * @author Berger
+ */
 public class Search {
 
 	@Size(max = 30)

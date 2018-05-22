@@ -1,4 +1,4 @@
-package com.etnetera.hr.rest.validation;
+package com.etnetera.hr.data.validation;
 
 import com.etnetera.hr.data.JavaScriptFramework;
 import com.etnetera.hr.data.JavaScriptFrameworkVersion;
@@ -8,6 +8,11 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * Actual validator for JavaScriptFrameworkVersions validator
+ *
+ * @author Berger
+ */
 public class JavaScriptFrameworkVersionsValidator implements ConstraintValidator<JavaScriptFrameworkVersions, JavaScriptFramework> {
 
 	@Override

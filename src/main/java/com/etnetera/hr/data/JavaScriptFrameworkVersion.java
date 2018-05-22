@@ -1,6 +1,5 @@
 package com.etnetera.hr.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
@@ -8,7 +7,6 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -133,7 +131,6 @@ public class JavaScriptFrameworkVersion {
 				", version='" + version + '\'' +
 				", versionOrder=" + versionOrder +
 				", hypeLevel=" + hypeLevel +
-				", framework=" + framework +
 				'}';
 	}
 }

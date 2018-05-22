@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.etnetera.hr.data.JavaScriptFrameworkHypeLevel;
 import com.etnetera.hr.data.JavaScriptFrameworkVersion;
+import com.etnetera.hr.rest.Search;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,86 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void deleteFrameworkValid() throws JsonProcessingException, Exception {
+	public void searchFrameworkValid() throws Exception {
+		prepareData();
+
+		Search search = new Search();
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(3)));
+
+		search.setName("Hipster.js");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(0)));
+
+		search.setName("ReactJS");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].name", is("ReactJS")));
+
+		search.setName("Vue");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].name", is("Vue.js")));
+
+		search.setName(".js");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(2)))
+				.andExpect(jsonPath("$[0].name", is("Angular.js")))
+				.andExpect(jsonPath("$[1].name", is("Vue.js")));
+
+		search.setName(null);
+		search.setHypeLevel(JavaScriptFrameworkHypeLevel.LOW);
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].name", is("ReactJS")));
+
+		search.setName(null);
+		search.setHypeLevel(null);
+		search.setVersion("1");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].name", is("ReactJS")));
+
+		search.setName("Angular.js");
+		search.setHypeLevel(JavaScriptFrameworkHypeLevel.MEDIUM);
+		search.setVersion("0.0.4");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$[0].name", is("Angular.js")));
+
+	}
+
+	@Test
+	public void searchFrameworkInvalid() throws Exception {
+		prepareData();
+
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(null))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors", hasSize(1)))
+				.andExpect(jsonPath("$.errors[0].message", is("GENERAL_ERROR")));
+
+		Search search = new Search();
+		search.setName("verylongnameofthejavascriptframeworkjavaisthebest");
+		search.setVersion("verylongnameofthejavascriptframeworkjavaisthebest");
+		mockMvc.perform(post("/frameworks/search").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(search))).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors", hasSize(2)))
+				.andExpect(jsonPath("$.errors[0].message", is("Size")))
+				.andExpect(jsonPath("$.errors[0].field", is("name")))
+				.andExpect(jsonPath("$.errors[1].message", is("Size")))
+				.andExpect(jsonPath("$.errors[1].field", is("version")));
+	}
+
+	@Test
+	public void deleteFrameworkValid() throws Exception {
 		prepareData();
 		JavaScriptFramework remaining = repository.findAll().iterator().next();
 		mockMvc.perform(delete("/frameworks/"+remaining.getId())).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8));
@@ -121,7 +201,7 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void deleteFrameworkInvalid() throws JsonProcessingException, Exception {
+	public void deleteFrameworkInvalid() throws Exception {
 		prepareData();
 		mockMvc.perform(delete("/frameworks/999")).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(status().isBadRequest())
@@ -131,7 +211,7 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void editFrameworkValid() throws JsonProcessingException, Exception {
+	public void editFrameworkValid() throws Exception {
 		prepareData();
 		Iterator<JavaScriptFramework> iterator = repository.findAll().iterator();
 		JavaScriptFramework toEdit = iterator.next();
@@ -228,7 +308,7 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void editFrameworkInvalid() throws JsonProcessingException, Exception {
+	public void editFrameworkInvalid() throws Exception {
 		prepareData();
 		JavaScriptFramework framework = new JavaScriptFramework();
 		framework.setName("goodname");
@@ -239,7 +319,7 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void addFrameworkValid() throws JsonProcessingException, Exception {
+	public void addFrameworkValid() throws Exception {
 		repository.deleteAll();
 		addFrameWorkAndCheck("goodname");
 		addFrameWorkAndCheck("goodname2");
@@ -267,7 +347,12 @@ public class JavaScriptFrameworkTests {
 	}
 
 	@Test
-	public void addFrameworkInvalid() throws JsonProcessingException, Exception {
+	public void addFrameworkInvalid() throws Exception {
+		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(null)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errors", hasSize(1)))
+				.andExpect(jsonPath("$.errors[0].message", is("GENERAL_ERROR")));
+
 		JavaScriptFramework framework = new JavaScriptFramework();
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
 				.andExpect(status().isBadRequest())
@@ -289,11 +374,11 @@ public class JavaScriptFrameworkTests {
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.errors", hasSize(1)))
-				.andExpect(jsonPath("$.errors[0].message", is("PERSISTENCE_ERROR")));
+				.andExpect(jsonPath("$.errors[0].message", is("GENERAL_ERROR")));
 	}
 
 	@Test
-	public void addFrameworkVersionInvalid() throws JsonProcessingException, Exception {
+	public void addFrameworkVersionInvalid() throws Exception {
 		JavaScriptFramework framework = new JavaScriptFramework();
 
 		/* all fields in version are null */
